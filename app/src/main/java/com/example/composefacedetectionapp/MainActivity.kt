@@ -35,8 +35,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen() {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
     
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -48,36 +46,36 @@ fun MainScreen() {
                 contentAlignment = Alignment.BottomCenter
             ) {
                 FloatingActionButton(
-                    onClick = { /* TODO */ },
+                    onClick = {  },
                     modifier = Modifier.align(Alignment.BottomCenter)
                 ) {
                     Icon(
-                        painter = painterResource(id = android.R.drawable.ic_menu_camera),
-                        contentDescription = "Kamera"
+                        painter = painterResource(id = R.drawable.baseline_camera_alt_24),
+                        contentDescription = "Kamerayı çevir"
                     )
                 }
                 
                 FloatingActionButton(
-                    onClick = { /* TODO */ },
+                    onClick = {  },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(end = 20.dp)
                 ) {
                     Icon(
-                        painter = painterResource(id = android.R.drawable.ic_menu_close_clear_cancel),
-                        contentDescription = "Başlat"
+                        painter = painterResource(id = R.drawable.baseline_close_24),
+                        contentDescription = "Durdur"
                     )
                 }
                 
                 FloatingActionButton(
-                    onClick = { /* TODO */ },
+                    onClick = {  },
                     modifier = Modifier
                         .align(Alignment.BottomStart)
                         .padding(start = 20.dp)
                 ) {
                     Icon(
-                        painter = painterResource(id = android.R.drawable.ic_menu_close_clear_cancel),
-                        contentDescription = "Durdur"
+                        painter = painterResource(id = R.drawable.baseline_play_arrow_24),
+                        contentDescription = "Başlat"
                     )
                 }
             }
