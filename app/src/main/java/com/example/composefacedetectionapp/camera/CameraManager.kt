@@ -12,57 +12,74 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import com.example.composefacedetectionapp.graphic.GraphicOverlay
 import com.example.composefacedetectionapp.graphic.utils.CameraUtils
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class CameraManager(
-    private val context : Context,
-    private val previewView : PreviewView,
-    private val graphicOverlay: GraphicOverlay<*>,
-    private val lifecycleOwner : LifecycleOwner
+@Singleton
+class CameraManager @Inject constructor(
+    @ApplicationContext private val context: Context
 ) {
-
     private lateinit var cameraProvider: ProcessCameraProvider
-    private lateinit var preview : Preview
+    private lateinit var preview: Preview
     private lateinit var imageAnalysis: ImageAnalysis
-    private lateinit var camera : Camera
-    private var cameraExecutor : ExecutorService = Executors.newSingleThreadExecutor()
+    private lateinit var camera: Camera
+    private var cameraExecutor: ExecutorService = Executors.newSingleThreadExecutor()
+    private var previewView: PreviewView? = null
+    private var graphicOverlay: GraphicOverlay<*>? = null
+    private var lifecycleOwner: LifecycleOwner? = null
+
+    fun initialize(
+        previewView: PreviewView,
+        graphicOverlay: GraphicOverlay<*>,
+        lifecycleOwner: LifecycleOwner
+    ) {
+        this.previewView = previewView
+        this.graphicOverlay = graphicOverlay
+        this.lifecycleOwner = lifecycleOwner
+    }
 
     fun cameraStart() {
-        val cameraProcessProvider = ProcessCameraProvider.getInstance(context)
+        previewView?.let { previewView ->
+            lifecycleOwner?.let { lifecycleOwner ->
+                val cameraProcessProvider = ProcessCameraProvider.getInstance(context)
 
-        cameraProcessProvider.addListener(
-            {
-                cameraProvider = cameraProcessProvider.get()
-                preview = Preview.Builder().build()
+                cameraProcessProvider.addListener(
+                    {
+                        cameraProvider = cameraProcessProvider.get()
+                        preview = Preview.Builder().build()
 
-                imageAnalysis = ImageAnalysis.Builder()
-                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                    .build()
-                    .also {
-                        it.setAnalyzer(cameraExecutor, CameraAnalyzer(graphicOverlay))
-                    }
-                val cameraSelector = CameraSelector.Builder()
-                    .requireLensFacing(cameraOption)
-                    .build()
+                        imageAnalysis = ImageAnalysis.Builder()
+                            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                            .build()
+                            .also {
+                                it.setAnalyzer(cameraExecutor, CameraAnalyzer(graphicOverlay!!))
+                            }
+                        val cameraSelector = CameraSelector.Builder()
+                            .requireLensFacing(cameraOption)
+                            .build()
 
-                setCameraConfig(cameraProvider, cameraSelector)
-            },
-            ContextCompat.getMainExecutor(context)
-        )
+                        setCameraConfig(cameraProvider, cameraSelector)
+                    },
+                    ContextCompat.getMainExecutor(context)
+                )
+            }
+        }
     }
 
     private fun setCameraConfig(cameraProvider: ProcessCameraProvider, cameraSelector: CameraSelector) {
         try {
             cameraProvider.unbindAll()
             camera = cameraProvider.bindToLifecycle(
-                lifecycleOwner,
+                lifecycleOwner!!,
                 cameraSelector,
                 preview,
                 imageAnalysis
             )
-            preview.setSurfaceProvider(previewView.surfaceProvider)
-        } catch (e : Exception) {
+            preview.setSurfaceProvider(previewView!!.surfaceProvider)
+        } catch (e: Exception) {
             Log.e(TAG, "setCameraConfig : $e")
         }
     }
@@ -75,12 +92,14 @@ class CameraManager(
         cameraStart()
     }
 
-    fun cameraStop () {
-        cameraProvider.unbindAll()
+    fun cameraStop() {
+        if (::cameraProvider.isInitialized) {
+            cameraProvider.unbindAll()
+        }
     }
 
     companion object {
-        private const val TAG : String = "CameraManager"
-        var cameraOption : Int = CameraSelector.LENS_FACING_FRONT
+        private const val TAG: String = "CameraManager"
+        var cameraOption: Int = CameraSelector.LENS_FACING_FRONT
     }
 }

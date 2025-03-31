@@ -17,27 +17,30 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.camera.view.PreviewView
 import androidx.compose.ui.viewinterop.AndroidView
+import com.example.composefacedetectionapp.camera.CameraManager
 import com.example.composefacedetectionapp.ui.theme.ComposeFaceDetectionAppTheme
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-
+    @Inject
+    lateinit var cameraManager: CameraManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             ComposeFaceDetectionAppTheme {
-                MainScreen()
+                MainScreen(cameraManager)
             }
         }
     }
 }
 
 @Composable
-fun MainScreen() {
+fun MainScreen(cameraManager: CameraManager) {
     
     Scaffold(
         modifier = Modifier.fillMaxSize(),
