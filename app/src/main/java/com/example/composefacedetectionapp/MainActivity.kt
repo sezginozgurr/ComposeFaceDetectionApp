@@ -1,9 +1,13 @@
 package com.example.composefacedetectionapp
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.camera.view.PreviewView
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import com.example.composefacedetectionapp.camera.CameraManager
 import com.example.composefacedetectionapp.ui.theme.ComposeFaceDetectionAppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,12 +33,37 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var cameraManager: CameraManager
 
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            cameraManager.cameraStart()
+        } else {
+            Toast.makeText(this, "Kamera izni reddedildi!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        askCameraPermission()
         setContent {
             ComposeFaceDetectionAppTheme {
                 MainScreen(cameraManager)
+            }
+        }
+    }
+
+    private fun askCameraPermission() {
+        when {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                cameraManager.cameraStart()
+            }
+            else -> {
+                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
             }
         }
     }
@@ -52,7 +82,7 @@ fun MainScreen(cameraManager: CameraManager) {
                 contentAlignment = Alignment.BottomCenter
             ) {
                 FloatingActionButton(
-                    onClick = {  },
+                    onClick = { cameraManager.changeCamera() },
                     modifier = Modifier.align(Alignment.BottomCenter)
                 ) {
                     Icon(
@@ -62,7 +92,7 @@ fun MainScreen(cameraManager: CameraManager) {
                 }
                 
                 FloatingActionButton(
-                    onClick = {  },
+                    onClick = { cameraManager.cameraStop() },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(end = 20.dp)
@@ -74,7 +104,7 @@ fun MainScreen(cameraManager: CameraManager) {
                 }
                 
                 FloatingActionButton(
-                    onClick = {  },
+                    onClick = { cameraManager.cameraStart() },
                     modifier = Modifier
                         .align(Alignment.BottomStart)
                         .padding(start = 20.dp)
