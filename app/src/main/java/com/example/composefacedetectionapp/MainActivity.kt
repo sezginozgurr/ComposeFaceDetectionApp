@@ -15,14 +15,21 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.camera.view.PreviewView
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.composefacedetectionapp.camera.CameraManager
+import com.example.composefacedetectionapp.camera.FaceGraphicOverlay
 import com.example.composefacedetectionapp.ui.theme.ComposeFaceDetectionAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -71,6 +78,9 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(cameraManager: CameraManager) {
+    val lifecycle = LocalLifecycleOwner.current
+    var previewView by remember { mutableStateOf<PreviewView?>(null) }
+    var graphicOverlay by remember { mutableStateOf<FaceGraphicOverlay?>(null) }
     
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -130,10 +140,26 @@ fun MainScreen(cameraManager: CameraManager) {
                             android.view.ViewGroup.LayoutParams.MATCH_PARENT
                         )
                         scaleType = PreviewView.ScaleType.FIT_CENTER
+                        previewView = this
                     }
                 },
                 modifier = Modifier.fillMaxSize()
             )
+            
+            AndroidView(
+                factory = { context ->
+                    FaceGraphicOverlay(context, null).apply {
+                        graphicOverlay = this
+                    }
+                },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+    
+    LaunchedEffect(previewView, graphicOverlay) {
+        if (previewView != null && graphicOverlay != null) {
+            cameraManager.initialize(previewView!!, graphicOverlay!!, lifecycle)
         }
     }
 }
