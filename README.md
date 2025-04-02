@@ -4,7 +4,7 @@ Android'in Jetpack Compose framework'ü kullanılarak geliştirilmiş bir yüz t
 
 ## Ekran Görüntüleri
 
-  <img src="screenshots/screenshot_1.jpg" width="250" alt="Ana Ekran">
+  <img src="screenshots/screenshot_1.png" alt="Ana Ekran">
 
 ## Özellikler
 
@@ -22,12 +22,6 @@ Android'in Jetpack Compose framework'ü kullanılarak geliştirilmiş bir yüz t
 - Hilt (Dependency Injection)
 - Coroutines
 - Flow
-
-## Gereksinimler
-
-- Android Studio Arctic Fox veya üzeri
-- Minimum SDK: 21
-- Target SDK: 34
 
 ## İzinler
 
